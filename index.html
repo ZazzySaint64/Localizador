@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz de Localização</title>
+
+  <!-- Ligando o arquivo de estilo separado -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <main class="container">
+
+    <!-- Número da pergunta atual, ex: "Pergunta 1 de 4" -->
+    <p id="contador">Pergunta 1 de 4</p>
+
+    <!-- O texto da pergunta/pista muda dinamicamente via JavaScript -->
+    <h1 id="pergunta">Carregando pergunta...</h1>
+
+    <!-- Botão principal: o usuário aperta quando acha que chegou no lugar certo -->
+    <button id="botao-checar">É aqui!</button>
+
+    <!-- Onde vai aparecer "Ops, lugar errado..." ou uma mensagem de sucesso -->
+    <p id="mensagem"></p>
+
+  </main>
+
+  <!-- O script fica no fim do body -->
+  <script src="script.js"></script>
+</body>
+</html>

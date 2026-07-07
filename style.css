@@ -1,0 +1,28 @@
+/* Por enquanto, um estilo mínimo só para não ficar feio.
+   Vamos personalizar isso juntos depois que a lógica estiver funcionando. */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+  background-color: #f2f2f2;
+}
+
+.container {
+  text-align: center;
+  padding: 2rem;
+  max-width: 400px;
+}
+
+#botao-checar {
+  padding: 0.8rem 1.5rem;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
