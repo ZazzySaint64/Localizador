@@ -68,6 +68,64 @@ body {
      Uma sombra suave por baixo do cartão cria sensação de
      profundidade (o cartão parece "flutuar" sobre o fundo). */
   box-shadow: 0 12px 30px var(--sombra);
+
+  /* "position: relative" aqui é o que faz o ::before (que vamos
+     posicionar como "absolute" logo abaixo) se orientar em relação
+     a ESTE elemento, e não à página inteira. Explicado no chat. */
+  position: relative;
+}
+
+/* ============================================================
+   4.1 O CORAÇÃO DECORATIVO — pseudo-elemento ::before
+   ============================================================
+   Isso NÃO é um elemento HTML real. É um "conteúdo gerado" pelo
+   CSS, desenhado antes do conteúdo verdadeiro do .container. */
+.container::before {
+  content: "♥";
+  /* content é OBRIGATÓRIO: sem essa linha, nada aparece, mesmo
+     com todas as outras propriedades abaixo definidas. */
+
+  position: absolute;
+  /* "absolute" tira o coração do fluxo normal da página (ele não
+     empurra outros elementos) e o posiciona relativo ao ancestral
+     mais próximo que tenha position:relative — que é o .container,
+     por causa da linha que adicionamos acima. Sem aquela linha, ele
+     se posicionaria relativo à página INTEIRA, e apareceria no
+     canto errado. */
+
+  top: -18px;      /* 18px para CIMA do topo do cartão */
+  left: 50%;       /* começa no meio horizontal do cartão... */
+  transform: translateX(-50%);
+  /* ...e este translateX(-50%) corrige o posicionamento: "left: 50%"
+     sozinho alinharia a BORDA ESQUERDA do coração ao centro do
+     cartão (ficando descentralizado). Deslocando -50% da PRÓPRIA
+     largura do coração, ele fica de fato centralizado. Esse par
+     "left:50% + translateX(-50%)" é um padrão clássico de CSS para
+     centralizar um elemento de largura desconhecida. */
+
+  font-size: 2.5rem;
+  color: var(--vermelho-amor);
+
+  background-color: var(--cartao);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%; /* 50% num quadrado = vira um círculo perfeito */
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: 0 4px 12px var(--sombra);
+
+  animation: pulsar 1.8s ease-in-out infinite;
+}
+
+/* Animação sutil e contínua: o coração "respira", crescendo e
+   encolhendo levemente, sem parar — dá vida à página mesmo
+   quando o usuário não está interagindo com nada. */
+@keyframes pulsar {
+  0%, 100% { transform: translateX(-50%) scale(1); }
+  50%      { transform: translateX(-50%) scale(1.12); }
 }
 
 /* ============================================================
