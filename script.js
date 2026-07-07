@@ -107,13 +107,26 @@ function verificarLocalizacao() {
 
       // if / else pedido: perto o suficiente do alvo?
       if (distancia <= alvo.raioMetros) {
+        // classList.remove tira uma classe antiga (se estava lá de uma
+        // tentativa anterior), antes de avançar para a próxima pergunta.
+        elMensagem.classList.remove("erro");
         avancarParaProximaPergunta();
       } else {
         elMensagem.textContent = "Ops, lugar errado...";
+
+        // classList.remove + classList.add: removemos a classe antes de
+        // adicionar de novo. Isso é necessário porque, se o usuário errar
+        // duas vezes seguidas, a classe já estaria lá na segunda vez, e o
+        // navegador NÃO dispara a animação CSS de novo para uma classe
+        // que já está aplicada (para o navegador, "nada mudou").
+        elMensagem.classList.remove("erro");
+        void elMensagem.offsetWidth; // truque explicado no chat
+        elMensagem.classList.add("erro");
       }
     },
     // Callback de ERRO: usuário negou permissão, GPS falhou, etc.
     (erro) => {
+      elMensagem.classList.remove("erro");
       elMensagem.textContent = "Não foi possível obter sua localização. Verifique se você permitiu o acesso ao GPS.";
       console.error(erro);
     },
@@ -131,9 +144,10 @@ function avancarParaProximaPergunta() {
   if (indiceAtual < perguntas.length) {
     mostrarPerguntaAtual();
   } else {
-    elPergunta.textContent = "Parabéns! Você sabe tudo sobre nós!";
+    elPergunta.textContent = "Parabéns! Você sabe tudo sobre nós! Feliz 4 anos de namoro, meu amor! ❤️";
     elContador.textContent = "";
     elMensagem.textContent = "";
+    elMensagem.classList.add("sucesso");
     elBotao.style.display = "none";
   }
 }

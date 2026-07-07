@@ -1,28 +1,178 @@
-/* Por enquanto, um estilo mínimo só para não ficar feio.
-   Vamos personalizar isso juntos depois que a lógica estiver funcionando. */
+/* ============================================================
+   1. VARIÁVEIS CSS (custom properties)
+   ============================================================
+   Em vez de espalhar o código hexadecimal da cor "#D7263D" em
+   10 lugares diferentes do arquivo, definimos ela UMA vez aqui,
+   com um nome (--vermelho-amor). Depois, usamos var(--vermelho-amor)
+   onde precisar.
 
+   Por que isso importa na prática: se um dia você quiser trocar
+   o tom de vermelho, muda em UM lugar só, e o site inteiro
+   atualiza sozinho — em vez de caçar e substituir o valor em
+   cada regra que o usa. */
+
+:root {
+  --fundo: #FFE8EC;          /* rosa clarinho, cor de fundo da página */
+  --cartao: #FFFFFF;         /* fundo do "cartão" central */
+  --vermelho-amor: #D7263D;  /* cor de destaque: botão, detalhes */
+  --vermelho-escuro: #B01E30;/* usada no hover do botão (mais escura) */
+  --laranja-apoio: #FF9F1C;  /* cor de apoio, usada com moderação */
+  --texto: #2B2024;          /* quase-preto avermelhado, para leitura */
+  --texto-suave: #7A6A6E;    /* cinza-rosado, para textos secundários */
+  --sombra: rgba(43, 32, 36, 0.15); /* sombra do cartão */
+}
+
+/* ============================================================
+   2. RESET BÁSICO
+   ============================================================ */
 * {
-  box-sizing: border-box;
-}
-
-body {
-  font-family: sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
+  box-sizing: border-box; /* explicado no chat: padding/border não somam à largura */
   margin: 0;
-  background-color: #f2f2f2;
+  padding: 0;
 }
 
+/* ============================================================
+   3. BODY: centraliza o cartão na tela, define o "clima" geral
+   ============================================================ */
+body {
+  font-family: 'Nunito', sans-serif;
+  background-color: var(--fundo);
+
+  /* Flexbox: transforma o body num "container flexível" que
+     centraliza seu conteúdo filho tanto na horizontal quanto
+     na vertical, ocupando a tela toda. */
+  display: flex;
+  justify-content: center; /* centraliza no eixo horizontal */
+  align-items: center;     /* centraliza no eixo vertical    */
+  min-height: 100vh;       /* 100vh = 100% da altura visível da tela */
+
+  padding: 1.5rem; /* respiro nas bordas em telas pequenas */
+}
+
+/* ============================================================
+   4. O CARTÃO CENTRAL
+   ============================================================
+   Em vez de o conteúdo "flutuar" solto no fundo rosa, colocamos
+   ele dentro de um cartão branco — isso cria contraste visual
+   e dá ao usuário uma área clara de foco. */
 .container {
+  background-color: var(--cartao);
   text-align: center;
-  padding: 2rem;
+  padding: 2.5rem 2rem;
   max-width: 400px;
+  width: 100%;
+
+  border-radius: 24px; /* cantos bem arredondados = visual "fofo/divertido" */
+
+  /* box-shadow: x-offset | y-offset | blur | cor
+     Uma sombra suave por baixo do cartão cria sensação de
+     profundidade (o cartão parece "flutuar" sobre o fundo). */
+  box-shadow: 0 12px 30px var(--sombra);
 }
 
+/* ============================================================
+   5. TIPOGRAFIA
+   ============================================================ */
+#contador {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 600;
+  color: var(--laranja-apoio);
+  text-transform: uppercase; /* deixa em maiúsculas, estilo "etiqueta" */
+  letter-spacing: 0.05em;    /* espaçamento entre letras, melhora legibilidade em maiúsculas */
+  font-size: 0.9rem;
+  margin-bottom: 0.8rem;
+}
+
+#pergunta {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  color: var(--texto);
+  font-size: 1.6rem;
+  line-height: 1.3; /* espaçamento entre linhas, evita texto "grudado" quando quebra linha */
+  margin-bottom: 1.8rem;
+}
+
+#mensagem {
+  font-weight: 600;
+  min-height: 1.5rem; /* reserva espaço mesmo vazio, evita o layout "pular" quando o texto aparece */
+  margin-top: 1rem;
+  color: var(--texto-suave);
+}
+
+/* Classes que o JavaScript vai adicionar/remover dinamicamente
+   (explicado no chat) para colorir a mensagem de acordo com o
+   resultado: erro (vermelho) ou sucesso (verde). */
+#mensagem.erro {
+  color: var(--vermelho-amor);
+  animation: balancar 0.4s ease;
+}
+
+#mensagem.sucesso {
+  color: #2E9E5B;
+}
+
+/* ============================================================
+   6. O BOTÃO — o elemento mais importante da interface
+   ============================================================ */
 #botao-checar {
-  padding: 0.8rem 1.5rem;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
   font-size: 1.1rem;
+  color: white;
+
+  background-color: var(--vermelho-amor);
+  border: none;
+  border-radius: 999px; /* valor bem alto = vira formato de "pílula" */
+
+  padding: 0.9rem 2.2rem;
   cursor: pointer;
+
+  /* transition: anima QUALQUER mudança de propriedade (cor, tamanho...)
+     suavemente ao longo de 0.2s, em vez de trocar instantaneamente.
+     É isso que faz o hover parecer "vivo" em vez de brusco. */
+  transition: transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+
+  box-shadow: 0 6px 16px rgba(215, 38, 61, 0.35);
+}
+
+/* :hover = enquanto o mouse está sobre o botão (não existe em toque,
+   mas não atrapalha — é só ignorado em celulares) */
+#botao-checar:hover {
+  background-color: var(--vermelho-escuro);
+  transform: translateY(-2px); /* sobe 2px, reforça sensação de "clicável" */
+  box-shadow: 0 10px 20px rgba(215, 38, 61, 0.45);
+}
+
+/* :active = no exato instante do clique/toque, dá feedback tátil imediato */
+#botao-checar:active {
+  transform: translateY(0) scale(0.97);
+}
+
+/* ============================================================
+   7. ANIMAÇÃO DE "ERRO" — pequeno balanço, feedback divertido
+   ============================================================
+   @keyframes define os "quadros-chave" de uma animação: em 0%,
+   20%, 40%... do tempo total, o elemento está em uma posição X.
+   O navegador interpola (preenche) suavemente entre esses pontos. */
+@keyframes balancar {
+  0%, 100% { transform: translateX(0); }
+  20%      { transform: translateX(-6px); }
+  40%      { transform: translateX(6px); }
+  60%      { transform: translateX(-4px); }
+  80%      { transform: translateX(4px); }
+}
+
+/* ============================================================
+   8. RESPONSIVIDADE: ajuste fino para telas bem pequenas
+   ============================================================
+   Media query: aplica essas regras SÓ quando a largura da tela
+   for 360px ou menos (celulares mais antigos/compactos). */
+@media (max-width: 360px) {
+  #pergunta {
+    font-size: 1.35rem;
+  }
+
+  .container {
+    padding: 2rem 1.5rem;
+  }
 }
