@@ -150,6 +150,45 @@ body {
   margin-bottom: 1.8rem;
 }
 
+/* ============================================================
+   5.1 CAMPO DE RESPOSTA (charadas de texto)
+   ============================================================ */
+#resposta-input {
+  width: 100%;
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  color: var(--texto);
+
+  padding: 0.8rem 1rem;
+  border: 2px solid #F3D6DA; /* rosa mais forte que o fundo, mas sutil */
+  border-radius: 14px;
+
+  margin-bottom: 1.2rem;
+  outline: none; /* remove o contorno azul padrão do navegador... */
+  transition: border-color 0.15s ease;
+}
+
+/* ...e substituímos por algo consistente com a paleta: a borda
+   fica vermelha quando o campo está em foco (usuário clicou nele
+   ou chegou nele pelo teclado). Isso é acessibilidade: a pessoa
+   PRECISA de algum sinal visual de qual campo está ativo. */
+#resposta-input:focus {
+  border-color: var(--vermelho-amor);
+}
+
+/* ============================================================
+   5.2 CLASSE UTILITÁRIA: esconder qualquer elemento
+   ============================================================
+   Uma "classe utilitária" é uma classe pequena, genérica, que
+   faz UMA coisa só e pode ser reaproveitada em qualquer elemento
+   — diferente de #resposta-input, que só faz sentido para aquele
+   elemento específico. O JavaScript adiciona/remove essa classe
+   para mostrar ou esconder o campo de texto e, no fim do quiz,
+   também o botão. */
+.escondido {
+  display: none;
+}
+
 #mensagem {
   font-weight: 600;
   min-height: 1.5rem; /* reserva espaço mesmo vazio, evita o layout "pular" quando o texto aparece */

@@ -1,28 +1,52 @@
 // ========================================================
-// 1. OS DADOS: as 4 perguntas, cada uma com sua coordenada-alvo
+// 1. AS ETAPAS: localizações reais + as 3 charadas de texto
 // ========================================================
-// Guardamos como uma LISTA de objetos (em vez de 4 blocos de código
-// repetidos) para termos UMA lógica só que serve para as 4 perguntas.
-const perguntas = [
+const etapas = [
   {
+    tipo: "localizacao",
     texto: "Nosso primeiro beijo",
     latitude: -30.14994417285114,
     longitude: -51.13829693246541,
     raioMetros: 40
   },
+
   {
+    tipo: "texto",
+    texto: "Qual é o nosso alimento do amor?",
+    validacao: "texto",
+    resposta: "arroz"
+  },
+  {
+    tipo: "texto",
+    texto: "Quantos graus estavam no dia do pedido?",
+    validacao: "numero",
+    resposta: "14"
+  },
+  {
+    tipo: "texto",
+    texto: "Qual foi a data do nosso primeiro beijo?",
+    validacao: "data",
+    dia: 12,
+    mes: 6,
+    ano: 2022
+  },
+
+  {
+    tipo: "localizacao",
     texto: "Nosso banquinho especial",
     latitude: -30.14937798131834,
     longitude: -51.140007918973375,
     raioMetros: 40
   },
   {
+    tipo: "localizacao",
     texto: "O lugar onde nos conhecemos",
     latitude: -30.14798257895677,
     longitude: -51.14486454595764,
     raioMetros: 40
   },
   {
+    tipo: "localizacao",
     texto: "A nossa cafeteria favorita",
     latitude: -30.080083596325935,
     longitude: -51.24816089014033,
@@ -30,29 +54,22 @@ const perguntas = [
   }
 ];
 
-// Guarda em qual pergunta o usuário está agora (começa na 0)
 let indiceAtual = 0;
 
 // ========================================================
 // 2. REFERÊNCIAS AOS ELEMENTOS DA TELA
 // ========================================================
-// Pegamos uma vez só, no início, para não ter que buscar
-// no HTML toda vez que precisarmos usá-los.
 const elPergunta = document.getElementById("pergunta");
 const elContador = document.getElementById("contador");
 const elMensagem = document.getElementById("mensagem");
 const elBotao = document.getElementById("botao-checar");
+const elInput = document.getElementById("resposta-input");
 
 // ========================================================
-// 3. FUNÇÃO QUE CALCULA A DISTÂNCIA ENTRE DUAS COORDENADAS
+// 3. DISTÂNCIA ENTRE COORDENADAS (Haversine)
 // ========================================================
-// Fórmula de Haversine: retorna a distância em METROS entre
-// dois pontos (lat1,lon1) e (lat2,lon2), considerando que a
-// Terra é uma esfera (não um plano).
 function calcularDistanciaMetros(lat1, lon1, lat2, lon2) {
   const raioTerraMetros = 6371000;
-
-  // A fórmula trabalha com radianos, não graus, então convertemos.
   const paraRadianos = (graus) => (graus * Math.PI) / 180;
 
   const deltaLat = paraRadianos(lat2 - lat1);
@@ -65,95 +82,183 @@ function calcularDistanciaMetros(lat1, lon1, lat2, lon2) {
       Math.sin(deltaLon / 2) ** 2;
 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
   return raioTerraMetros * c;
 }
 
 // ========================================================
-// 4. FUNÇÃO QUE ATUALIZA A TELA COM A PERGUNTA ATUAL
+// 4. NORMALIZAÇÃO DE TEXTO
 // ========================================================
-function mostrarPerguntaAtual() {
-  const pergunta = perguntas[indiceAtual];
-  elPergunta.textContent = pergunta.texto;
-  elContador.textContent = `Pergunta ${indiceAtual + 1} de ${perguntas.length}`;
-  elMensagem.textContent = "";
+function normalizar(texto) {
+  return texto
+    .toString()
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
 }
 
 // ========================================================
-// 5. FUNÇÃO PRINCIPAL: chamada quando o usuário aperta "É aqui!"
+// 5. VALIDAÇÃO DE RESPOSTA
 // ========================================================
-function verificarLocalizacao() {
-  // Verifica se o navegador suporta geolocalização
+function respostaEstaCorreta(etapa, valorDigitado) {
+  if (etapa.validacao === "texto") {
+    return normalizar(valorDigitado) === normalizar(etapa.resposta);
+  }
+
+  if (etapa.validacao === "numero") {
+    const encontrados = valorDigitado.match(/\d+/);
+    return encontrados !== null && encontrados[0] === etapa.resposta;
+  }
+
+  if (etapa.validacao === "data") {
+    const numeros = valorDigitado.match(/\d+/g);
+    if (!numeros || numeros.length < 3) return false;
+
+    const [diaDigitado, mesDigitado, anoDigitado] = numeros;
+
+    return (
+      parseInt(diaDigitado, 10) === etapa.dia &&
+      parseInt(mesDigitado, 10) === etapa.mes &&
+      parseInt(anoDigitado, 10) === etapa.ano
+    );
+  }
+
+  return false;
+}
+
+// ========================================================
+// 6. TEXTO DO CONTADOR
+// ========================================================
+function calcularTextoContador(indice) {
+  const tipo = etapas[indice].tipo;
+  const numero = etapas.slice(0, indice + 1).filter((e) => e.tipo === tipo).length;
+  const total = etapas.filter((e) => e.tipo === tipo).length;
+
+  return tipo === "localizacao"
+    ? `Local ${numero} de ${total}`
+    : `Charada ${numero} de ${total}`;
+}
+
+// ========================================================
+// 7. MOSTRAR A ETAPA ATUAL
+// ========================================================
+function mostrarEtapaAtual() {
+  const etapa = etapas[indiceAtual];
+
+  elPergunta.textContent = etapa.texto;
+  elContador.textContent = calcularTextoContador(indiceAtual);
+  elMensagem.textContent = "";
+  elMensagem.classList.remove("erro", "sucesso");
+
+  if (etapa.tipo === "localizacao") {
+    elInput.classList.add("escondido");
+    elBotao.textContent = "É aqui!";
+  } else {
+    elInput.classList.remove("escondido");
+    elInput.value = "";
+    elBotao.textContent = "Responder";
+    elInput.focus();
+  }
+}
+
+// ========================================================
+// 8. MENSAGEM DE ERRO (com animação)
+// ========================================================
+function mostrarErro(texto) {
+  elMensagem.textContent = texto;
+  elMensagem.classList.remove("erro");
+  void elMensagem.offsetWidth;
+  elMensagem.classList.add("erro");
+}
+
+// ========================================================
+// 9. VERIFICAR LOCALIZAÇÃO
+// ========================================================
+function verificarLocalizacao(etapa) {
   if (!navigator.geolocation) {
-    elMensagem.textContent = "Seu navegador não suporta geolocalização.";
+    mostrarErro("Seu navegador não suporta geolocalização.");
     return;
   }
 
   elMensagem.textContent = "Verificando sua localização...";
 
   navigator.geolocation.getCurrentPosition(
-    // Callback de SUCESSO: o navegador conseguiu a posição
     (posicao) => {
-      const latUsuario = posicao.coords.latitude;
-      const lonUsuario = posicao.coords.longitude;
-
-      const alvo = perguntas[indiceAtual];
       const distancia = calcularDistanciaMetros(
-        latUsuario,
-        lonUsuario,
-        alvo.latitude,
-        alvo.longitude
+        posicao.coords.latitude,
+        posicao.coords.longitude,
+        etapa.latitude,
+        etapa.longitude
       );
 
-      // if / else pedido: perto o suficiente do alvo?
-      if (distancia <= alvo.raioMetros) {
-        // classList.remove tira uma classe antiga (se estava lá de uma
-        // tentativa anterior), antes de avançar para a próxima pergunta.
-        elMensagem.classList.remove("erro");
-        avancarParaProximaPergunta();
+      if (distancia <= etapa.raioMetros) {
+        avancarEtapa();
       } else {
-        elMensagem.textContent = "Ops, lugar errado...";
-
-        // classList.remove + classList.add: removemos a classe antes de
-        // adicionar de novo. Isso é necessário porque, se o usuário errar
-        // duas vezes seguidas, a classe já estaria lá na segunda vez, e o
-        // navegador NÃO dispara a animação CSS de novo para uma classe
-        // que já está aplicada (para o navegador, "nada mudou").
-        elMensagem.classList.remove("erro");
-        void elMensagem.offsetWidth; // truque explicado no chat
-        elMensagem.classList.add("erro");
+        mostrarErro("Ops, lugar errado...");
       }
     },
-    // Callback de ERRO: usuário negou permissão, GPS falhou, etc.
     (erro) => {
-      elMensagem.classList.remove("erro");
-      elMensagem.textContent = "Não foi possível obter sua localização. Verifique se você permitiu o acesso ao GPS.";
+      mostrarErro("Não foi possível obter sua localização. Verifique se você permitiu o acesso ao GPS.");
       console.error(erro);
     },
-    // Opções: pede a posição mais precisa possível
     { enableHighAccuracy: true, timeout: 10000 }
   );
 }
 
 // ========================================================
-// 6. AVANÇAR PARA A PRÓXIMA PERGUNTA (OU TERMINAR O QUIZ)
+// 10. VERIFICAR RESPOSTA DE TEXTO
 // ========================================================
-function avancarParaProximaPergunta() {
+function verificarTexto(etapa) {
+  if (respostaEstaCorreta(etapa, elInput.value)) {
+    avancarEtapa();
+  } else {
+    mostrarErro("Ops, resposta errada...");
+  }
+}
+
+// ========================================================
+// 11. CLIQUE NO BOTÃO — ramifica por tipo
+// ========================================================
+function verificarEtapaAtual() {
+  const etapa = etapas[indiceAtual];
+
+  if (etapa.tipo === "localizacao") {
+    verificarLocalizacao(etapa);
+  } else {
+    verificarTexto(etapa);
+  }
+}
+
+// ========================================================
+// 12. AVANÇAR PARA A PRÓXIMA ETAPA (OU TERMINAR O QUIZ)
+// ========================================================
+function avancarEtapa() {
   indiceAtual++;
 
-  if (indiceAtual < perguntas.length) {
-    mostrarPerguntaAtual();
+  if (indiceAtual < etapas.length) {
+    mostrarEtapaAtual();
   } else {
     elPergunta.textContent = "Parabéns! Você sabe tudo sobre nós! Feliz 4 anos de namoro, meu amor! ❤️";
     elContador.textContent = "";
     elMensagem.textContent = "";
     elMensagem.classList.add("sucesso");
-    elBotao.style.display = "none";
+    elBotao.classList.add("escondido");
+    elInput.classList.add("escondido");
   }
 }
 
 // ========================================================
-// 7. LIGANDO O BOTÃO À FUNÇÃO E INICIANDO O QUIZ
+// 13. EVENTOS
 // ========================================================
-elBotao.addEventListener("click", verificarLocalizacao);
-mostrarPerguntaAtual();
+elBotao.addEventListener("click", verificarEtapaAtual);
+
+elInput.addEventListener("keydown", (evento) => {
+  if (evento.key === "Enter") {
+    verificarEtapaAtual();
+  }
+});
+
+// ========================================================
+// 14. INICIA O QUIZ
+// ========================================================
+mostrarEtapaAtual();
